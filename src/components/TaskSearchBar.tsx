@@ -1,8 +1,9 @@
 import { memo } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 
-import { palette } from '../theme/palette';
+import { getTheme } from '../theme/palette';
 import { radius, spacing } from '../theme/spacing';
+import { typography } from '../theme/typography';
 
 interface TaskSearchBarProps {
   value: string;
@@ -12,7 +13,7 @@ interface TaskSearchBarProps {
 
 export const TaskSearchBar = memo(
   ({ value, onChangeText, isDarkMode }: TaskSearchBarProps) => {
-    const colors = isDarkMode ? palette.dark : palette.light;
+    const colors = getTheme(isDarkMode);
 
     return (
       <View style={[styles.container, { backgroundColor: colors.card, borderColor: colors.border }]}> 
@@ -20,10 +21,11 @@ export const TaskSearchBar = memo(
           value={value}
           onChangeText={onChangeText}
           placeholder="Search tasks..."
-          placeholderTextColor={colors.secondaryText}
+          placeholderTextColor={colors.placeholder}
           style={[styles.input, { color: colors.text }]}
           autoCorrect={false}
           clearButtonMode="while-editing"
+          returnKeyType="search"
         />
       </View>
     );
@@ -37,7 +39,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
   },
   input: {
-    fontSize: 16,
+    ...typography.body,
     paddingVertical: spacing.md,
   },
 });

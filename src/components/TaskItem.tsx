@@ -2,8 +2,9 @@ import { memo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown, FadeOutUp, LinearTransition } from 'react-native-reanimated';
 
-import { palette } from '../theme/palette';
+import { getTheme } from '../theme/palette';
 import { radius, spacing } from '../theme/spacing';
+import { typography } from '../theme/typography';
 import { Task } from '../types/task';
 import { PriorityBadge } from './PriorityBadge';
 
@@ -17,7 +18,7 @@ interface TaskItemProps {
 
 export const TaskItem = memo(
   ({ task, isDarkMode, onToggleComplete, onEditTask, onDeleteTask }: TaskItemProps) => {
-    const colors = isDarkMode ? palette.dark : palette.light;
+    const colors = getTheme(isDarkMode);
     const checkboxFillStyle = {
       backgroundColor: task.completed ? colors.success : 'transparent',
     };
@@ -37,7 +38,10 @@ export const TaskItem = memo(
         ]}>
         <Pressable
           onPress={() => onToggleComplete(task.id)}
-          style={styles.statusRow}
+          style={({ pressed }) => [
+            styles.statusRow,
+            pressed && { opacity: 0.78 },
+          ]}
           accessibilityRole="checkbox"
           accessibilityState={{ checked: task.completed }}>
           <View
@@ -73,10 +77,22 @@ export const TaskItem = memo(
         <View style={styles.footerRow}>
           <PriorityBadge priority={task.priority} isDarkMode={isDarkMode} />
           <View style={styles.actionRow}>
-            <Pressable onPress={() => onEditTask(task)} style={styles.actionButton}>
-              <Text style={[styles.actionText, { color: colors.accent }]}>Edit</Text>
+            <Pressable
+              onPress={() => onEditTask(task)}
+              style={({ pressed }) => [
+                styles.actionButton,
+                { backgroundColor: colors.primaryMuted },
+                pressed && styles.pressedAction,
+              ]}>
+              <Text style={[styles.actionText, { color: colors.primary }]}>Edit</Text>
             </Pressable>
-            <Pressable onPress={() => onDeleteTask(task.id)} style={styles.actionButton}>
+            <Pressable
+              onPress={() => onDeleteTask(task.id)}
+              style={({ pressed }) => [
+                styles.actionButton,
+                { backgroundColor: colors.primaryMuted },
+                pressed && styles.pressedAction,
+              ]}>
               <Text style={[styles.actionText, { color: colors.danger }]}>Delete</Text>
             </Pressable>
           </View>
@@ -110,12 +126,11 @@ const styles = StyleSheet.create({
   },
   title: {
     flex: 1,
-    fontSize: 16,
+    ...typography.body,
     fontWeight: '700',
   },
   description: {
-    fontSize: 14,
-    lineHeight: 20,
+    ...typography.body,
   },
   completedText: {
     textDecorationLine: 'line-through',
@@ -134,8 +149,12 @@ const styles = StyleSheet.create({
   actionButton: {
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
+    borderRadius: radius.sm,
   },
   actionText: {
-    fontWeight: '700',
+    ...typography.label,
+  },
+  pressedAction: {
+    opacity: 0.72,
   },
 });

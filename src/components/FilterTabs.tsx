@@ -1,8 +1,9 @@
 import { memo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { palette } from '../theme/palette';
+import { getTheme } from '../theme/palette';
 import { radius, spacing } from '../theme/spacing';
+import { typography } from '../theme/typography';
 import { TaskFilter } from '../types/task';
 
 interface FilterTabsProps {
@@ -15,7 +16,7 @@ const filters: TaskFilter[] = ['all', 'pending', 'completed'];
 
 export const FilterTabs = memo(
   ({ activeFilter, onFilterChange, isDarkMode }: FilterTabsProps) => {
-    const colors = isDarkMode ? palette.dark : palette.light;
+    const colors = getTheme(isDarkMode);
 
     return (
       <View style={styles.container}>
@@ -27,11 +28,12 @@ export const FilterTabs = memo(
             <Pressable
               key={filter}
               onPress={() => onFilterChange(filter)}
-              style={[
+              style={({ pressed }) => [
                 styles.tab,
                 {
-                  backgroundColor: isActive ? colors.accent : colors.card,
+                  backgroundColor: isActive ? colors.primary : colors.card,
                   borderColor: colors.border,
+                  opacity: pressed ? 0.84 : 1,
                 },
               ]}>
               <Text
@@ -61,7 +63,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   tabText: {
-    fontSize: 13,
-    fontWeight: '600',
+    ...typography.label,
   },
 });

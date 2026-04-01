@@ -9,6 +9,7 @@ interface TaskState {
   query: string;
   filter: TaskFilter;
   isDarkMode: boolean;
+  hasHydrated: boolean;
   addTask: (draft: TaskDraft) => void;
   updateTask: (taskId: string, updates: TaskDraft) => void;
   deleteTask: (taskId: string) => void;
@@ -16,6 +17,7 @@ interface TaskState {
   setQuery: (query: string) => void;
   setFilter: (filter: TaskFilter) => void;
   toggleDarkMode: () => void;
+  setHasHydrated: (hasHydrated: boolean) => void;
 }
 
 const nowIso = () => new Date().toISOString();
@@ -27,6 +29,7 @@ export const useTaskStore = create<TaskState>()(
       query: '',
       filter: 'all',
       isDarkMode: false,
+      hasHydrated: false,
       addTask: draft => {
         const timestamp = nowIso();
 
@@ -87,11 +90,17 @@ export const useTaskStore = create<TaskState>()(
       toggleDarkMode: () => {
         set(state => ({ isDarkMode: !state.isDarkMode }));
       },
+      setHasHydrated: hasHydrated => {
+        set({ hasHydrated });
+      },
     }),
     {
       name: 'smart-task-manager-storage',
       storage: createJSONStorage(() => AsyncStorage),
       version: 1,
+      onRehydrateStorage: () => state => {
+        state?.setHasHydrated(true);
+      },
       partialize: state => ({
         tasks: state.tasks,
         isDarkMode: state.isDarkMode,

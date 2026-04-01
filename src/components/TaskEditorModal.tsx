@@ -10,8 +10,9 @@ import {
   View,
 } from 'react-native';
 
-import { palette } from '../theme/palette';
+import { getTheme } from '../theme/palette';
 import { radius, spacing } from '../theme/spacing';
+import { typography } from '../theme/typography';
 import { Task, TaskDraft, TaskPriority } from '../types/task';
 
 interface TaskEditorModalProps {
@@ -26,7 +27,7 @@ const priorities: TaskPriority[] = ['low', 'medium', 'high'];
 
 export const TaskEditorModal = memo(
   ({ visible, isDarkMode, task, onClose, onSave }: TaskEditorModalProps) => {
-    const colors = isDarkMode ? palette.dark : palette.light;
+    const colors = getTheme(isDarkMode);
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -70,8 +71,8 @@ export const TaskEditorModal = memo(
       <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={styles.overlay}>
-          <View style={[styles.card, { backgroundColor: colors.card }]}> 
+          style={[styles.overlay, { backgroundColor: colors.overlay }]}>
+          <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}> 
             <Text style={[styles.title, { color: colors.text }]}>
               {task ? 'Edit Task' : 'Add Task'}
             </Text>
@@ -80,7 +81,7 @@ export const TaskEditorModal = memo(
               value={title}
               onChangeText={setTitle}
               placeholder="Task title"
-              placeholderTextColor={colors.secondaryText}
+              placeholderTextColor={colors.placeholder}
               style={[styles.input, { color: colors.text, borderColor: colors.border }]}
               maxLength={80}
             />
@@ -89,7 +90,7 @@ export const TaskEditorModal = memo(
               value={description}
               onChangeText={setDescription}
               placeholder="Description (optional)"
-              placeholderTextColor={colors.secondaryText}
+              placeholderTextColor={colors.placeholder}
               style={[
                 styles.input,
                 styles.multilineInput,
@@ -109,11 +110,12 @@ export const TaskEditorModal = memo(
                   <Pressable
                     key={item}
                     onPress={() => setPriority(item)}
-                    style={[
+                    style={({ pressed }) => [
                       styles.priorityButton,
                       {
-                        backgroundColor: isActive ? colors.accent : colors.background,
+                        backgroundColor: isActive ? colors.primary : colors.background,
                         borderColor: colors.border,
+                        opacity: pressed ? 0.84 : 1,
                       },
                     ]}>
                     <Text
@@ -129,16 +131,21 @@ export const TaskEditorModal = memo(
             </View>
 
             <View style={styles.footer}>
-              <Pressable onPress={onClose} style={styles.footerButton}>
+              <Pressable
+                onPress={onClose}
+                style={({ pressed }) => [styles.footerButton, pressed && styles.pressedButton]}>
                 <Text style={[styles.footerButtonText, { color: colors.secondaryText }]}>Cancel</Text>
               </Pressable>
               <Pressable
                 onPress={onConfirm}
                 disabled={!canSave}
-                style={[
+                style={({ pressed }) => [
                   styles.footerButton,
                   styles.primaryButton,
-                  { backgroundColor: canSave ? colors.accent : colors.border },
+                  {
+                    backgroundColor: canSave ? colors.primary : colors.borderStrong,
+                    opacity: pressed ? 0.82 : 1,
+                  },
                 ]}>
                 <Text style={[styles.footerButtonText, styles.primaryButtonText]}>Save</Text>
               </Pressable>
@@ -153,25 +160,24 @@ export const TaskEditorModal = memo(
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.45)',
     justifyContent: 'center',
     padding: spacing.xl,
   },
   card: {
+    borderWidth: 1,
     borderRadius: radius.lg,
     padding: spacing.xl,
     gap: spacing.md,
   },
   title: {
-    fontSize: 20,
-    fontWeight: '700',
+    ...typography.title,
   },
   input: {
     borderWidth: 1,
     borderRadius: radius.md,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
-    fontSize: 16,
+    ...typography.body,
   },
   multilineInput: {
     minHeight: 100,
@@ -188,7 +194,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   priorityText: {
-    fontWeight: '700',
+    ...typography.label,
   },
   footer: {
     marginTop: spacing.sm,
@@ -202,7 +208,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
   },
   footerButtonText: {
-    fontWeight: '700',
+    ...typography.label,
   },
   primaryButton: {
     minWidth: 90,
@@ -210,5 +216,8 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     color: '#ffffff',
+  },
+  pressedButton: {
+    opacity: 0.72,
   },
 });
