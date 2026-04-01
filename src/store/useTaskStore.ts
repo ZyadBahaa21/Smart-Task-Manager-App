@@ -98,7 +98,11 @@ export const useTaskStore = create<TaskState>()(
       name: 'smart-task-manager-storage',
       storage: createJSONStorage(() => AsyncStorage),
       version: 1,
-      onRehydrateStorage: () => state => {
+      onRehydrateStorage: () => (state, error) => {
+        if (error) {
+          // TODO: route to app logger / user-facing recovery UI
+          console.error('Failed to rehydrate task store', error);
+        }
         state?.setHasHydrated(true);
       },
       partialize: state => ({
