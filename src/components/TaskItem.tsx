@@ -7,6 +7,7 @@ import { radius, spacing } from '../theme/spacing';
 import { typography } from '../theme/typography';
 import { Task } from '../types/task';
 import { PriorityBadge } from './PriorityBadge';
+import { useDueDateStatus } from '../hooks/useDueDateStatus';
 
 interface TaskItemProps {
   task: Task;
@@ -19,6 +20,7 @@ interface TaskItemProps {
 export const TaskItem = memo(
   ({ task, isDarkMode, onToggleComplete, onEditTask, onDeleteTask }: TaskItemProps) => {
     const colors = getTheme(isDarkMode);
+    const dueData = useDueDateStatus({ dueDate: task.dueDate, completed: task.completed });
     const checkboxFillStyle = {
       backgroundColor: task.completed ? colors.success : 'transparent',
     };
@@ -72,6 +74,23 @@ export const TaskItem = memo(
             ]}>
             {task.description}
           </Text>
+        ) : null}
+
+        {dueData.hasDueDate ? (
+          <View style={styles.dueRow}>
+            <Text
+              style={[
+                styles.dueText,
+                { color: dueData.isOverdue ? colors.danger : colors.secondaryText },
+              ]}>
+              Due: {dueData.label}
+            </Text>
+            {dueData.isOverdue ? (
+              <View style={[styles.overdueBadge, { backgroundColor: colors.primaryMuted }]}> 
+                <Text style={[styles.overdueText, { color: colors.danger }]}>Overdue</Text>
+              </View>
+            ) : null}
+          </View>
         ) : null}
 
         <View style={styles.footerRow}>
@@ -141,6 +160,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  dueRow: {
+    marginTop: spacing.xs,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  dueText: {
+    ...typography.caption,
+  },
+  overdueBadge: {
+    borderRadius: radius.pill,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+  },
+  overdueText: {
+    ...typography.caption,
+    fontWeight: '700',
   },
   actionRow: {
     flexDirection: 'row',

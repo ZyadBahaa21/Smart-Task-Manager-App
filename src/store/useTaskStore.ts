@@ -40,6 +40,7 @@ export const useTaskStore = create<TaskState>()(
               title: draft.title.trim(),
               description: draft.description.trim(),
               priority: draft.priority,
+              dueDate: draft.dueDate?.trim(),
               completed: false,
               createdAt: timestamp,
               updatedAt: timestamp,
@@ -57,6 +58,7 @@ export const useTaskStore = create<TaskState>()(
                   title: updates.title.trim(),
                   description: updates.description.trim(),
                   priority: updates.priority,
+                  dueDate: updates.dueDate?.trim(),
                   updatedAt: nowIso(),
                 }
               : task,

@@ -1,5 +1,6 @@
 import { memo, useEffect, useMemo, useState } from 'react';
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -31,7 +32,9 @@ export const TaskEditorModal = memo(
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
+    const [dueDate, setDueDate] = useState('');
     const [priority, setPriority] = useState<TaskPriority>('medium');
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
       if (!visible) {
@@ -41,13 +44,15 @@ export const TaskEditorModal = memo(
       if (task) {
         setTitle(task.title);
         setDescription(task.description);
+        setDueDate(task.dueDate ?? '');
         setPriority(task.priority);
       } else {
         setTitle('');
         setDescription('');
+        setDueDate('');
         setPriority('medium');
       }
-    }, [task, visible]);
+    }, [visible]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const canSave = useMemo(() => title.trim().length > 0, [title]);
 
@@ -56,15 +61,21 @@ export const TaskEditorModal = memo(
         return;
       }
 
-      onSave(
-        {
-          title,
-          description,
-          priority,
-        },
-        task?.id,
-      );
-      onClose();
+      setIsSaving(true);
+
+      setTimeout(() => {
+        onSave(
+          {
+            title,
+            description,
+            priority,
+            dueDate,
+          },
+          task?.id,
+        );
+        setIsSaving(false);
+        onClose();
+      }, 350);
     };
 
     return (
@@ -99,6 +110,14 @@ export const TaskEditorModal = memo(
               multiline
               textAlignVertical="top"
               maxLength={240}
+            />
+
+            <TextInput
+              value={dueDate}
+              onChangeText={setDueDate}
+              placeholder="Due date (YYYY-MM-DD)"
+              placeholderTextColor={colors.placeholder}
+              style={[styles.input, styles.dueDateInput, { color: colors.text, borderColor: colors.border }]}
             />
 
             <View style={styles.priorityRow}>
@@ -138,7 +157,7 @@ export const TaskEditorModal = memo(
               </Pressable>
               <Pressable
                 onPress={onConfirm}
-                disabled={!canSave}
+                disabled={!canSave || isSaving}
                 style={({ pressed }) => [
                   styles.footerButton,
                   styles.primaryButton,
@@ -147,7 +166,12 @@ export const TaskEditorModal = memo(
                     opacity: pressed ? 0.82 : 1,
                   },
                 ]}>
-                <Text style={[styles.footerButtonText, styles.primaryButtonText]}>Save</Text>
+                <View style={styles.saveButtonContent}>
+                  {isSaving ? <ActivityIndicator size="small" color="#ffffff" /> : null}
+                  <Text style={[styles.footerButtonText, styles.primaryButtonText]}>
+                    {isSaving ? 'Saving...' : 'Save'}
+                  </Text>
+                </View>
               </Pressable>
             </View>
           </View>
@@ -181,6 +205,12 @@ const styles = StyleSheet.create({
   },
   multilineInput: {
     minHeight: 100,
+  },
+  dueDateInput: {
+    borderWidth: 1,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
   },
   priorityRow: {
     flexDirection: 'row',
@@ -219,5 +249,10 @@ const styles = StyleSheet.create({
   },
   pressedButton: {
     opacity: 0.72,
+  },
+  saveButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
   },
 });
