@@ -10,6 +10,7 @@ interface TaskState {
   filter: TaskFilter;
   isDarkMode: boolean;
   hasHydrated: boolean;
+  rehydrateError: Error | null;
   addTask: (draft: TaskDraft) => void;
   updateTask: (taskId: string, updates: TaskDraft) => void;
   deleteTask: (taskId: string) => void;
@@ -18,6 +19,7 @@ interface TaskState {
   setFilter: (filter: TaskFilter) => void;
   toggleDarkMode: () => void;
   setHasHydrated: (hasHydrated: boolean) => void;
+  setRehydrateError: (error: Error | null) => void;
 }
 
 const nowIso = () => new Date().toISOString();
@@ -30,6 +32,7 @@ export const useTaskStore = create<TaskState>()(
       filter: 'all',
       isDarkMode: false,
       hasHydrated: false,
+      rehydrateError: null,
       addTask: draft => {
         const timestamp = nowIso();
 
@@ -93,17 +96,21 @@ export const useTaskStore = create<TaskState>()(
       setHasHydrated: hasHydrated => {
         set({ hasHydrated });
       },
+      setRehydrateError: error => {
+        set({ rehydrateError: error });
+      },
     }),
     {
       name: 'smart-task-manager-storage',
       storage: createJSONStorage(() => AsyncStorage),
       version: 1,
       onRehydrateStorage: () => (state, error) => {
-        if (error) {
-          // TODO: route to app logger / user-facing recovery UI
-          console.error('Failed to rehydrate task store', error);
+        if (!error) {
+          state?.setHasHydrated(true);
+        } else {
+          state?.setHasHydrated(false);
+          state?.setRehydrateError(error);
         }
-        state?.setHasHydrated(true);
       },
       partialize: state => ({
         tasks: state.tasks,

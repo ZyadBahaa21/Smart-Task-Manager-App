@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useMemo, useState } from 'react';
-import { FlatList, ListRenderItem, StyleSheet, View } from 'react-native';
+import { FlatList, ListRenderItem, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '../components/EmptyState';
@@ -26,6 +26,7 @@ export const TaskListScreen = (_props: Props) => {
   const filter = useTaskStore(state => state.filter);
   const isDarkMode = useTaskStore(state => state.isDarkMode);
   const hasHydrated = useTaskStore(state => state.hasHydrated);
+  const rehydrateError = useTaskStore(state => state.rehydrateError);
   const setQuery = useTaskStore(state => state.setQuery);
   const setFilter = useTaskStore(state => state.setFilter);
   const toggleDarkMode = useTaskStore(state => state.toggleDarkMode);
@@ -138,7 +139,14 @@ export const TaskListScreen = (_props: Props) => {
         <TaskSearchBar value={query} onChangeText={setQuery} isDarkMode={isDarkMode} />
         <FilterTabs activeFilter={filter} onFilterChange={setFilter} isDarkMode={isDarkMode} />
 
-        {!hasHydrated ? (
+        {rehydrateError ? (
+          <View style={styles.errorContainer}>
+            <Text style={[styles.errorTitle, { color: colors.danger }]}>Failed to load tasks</Text>
+            <Text style={[styles.errorSubtitle, { color: colors.secondaryText }]}>
+              {rehydrateError.message || 'An unexpected error occurred. Please restart the app.'}
+            </Text>
+          </View>
+        ) : !hasHydrated ? (
           <LoadingState isDarkMode={isDarkMode} />
         ) : (
           <FlatList
@@ -199,5 +207,21 @@ const styles = StyleSheet.create({
   emptyListContent: {
     flex: 1,
     justifyContent: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xl,
+    gap: spacing.sm,
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  errorSubtitle: {
+    fontSize: 14,
+    textAlign: 'center',
   },
 });
