@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 
 import { TaskListScreen } from '../screens/TaskListScreen';
 import { RootStackParamList } from '../types/navigation';
-import { palette } from '../theme/palette';
+import { getTheme } from '../theme/palette';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -13,7 +13,7 @@ interface AppNavigatorProps {
 }
 
 export const AppNavigator = ({ isDarkMode }: AppNavigatorProps) => {
-  const colors = isDarkMode ? palette.dark : palette.light;
+  const colors = getTheme(isDarkMode);
 
   const navigationTheme = useMemo(() => {
     const baseTheme = isDarkMode ? DarkTheme : DefaultTheme;
@@ -26,7 +26,7 @@ export const AppNavigator = ({ isDarkMode }: AppNavigatorProps) => {
         card: colors.card,
         text: colors.text,
         border: colors.border,
-        primary: colors.accent,
+        primary: colors.primary,
       },
     };
   }, [colors, isDarkMode]);
