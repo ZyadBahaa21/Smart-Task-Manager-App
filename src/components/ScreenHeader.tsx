@@ -23,7 +23,7 @@ export const ScreenHeader = memo(
           <Text style={[styles.subtitle, { color: colors.secondaryText }]}>{subtitle}</Text>
         </View>
 
-        <View style={[styles.modeToggleCard, { backgroundColor: colors.cardElevated, borderColor: colors.border }]}>
+        <View style={[styles.modeToggleCard, { backgroundColor: colors.cardElevated, borderColor: colors.border, shadowColor: colors.shadow }]}>
           <Text style={[styles.modeLabel, { color: colors.secondaryText }]}>Dark</Text>
           <Switch
             value={isDarkMode}
@@ -54,11 +54,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 14,
     paddingLeft: spacing.sm,
     paddingRight: spacing.xs,
     paddingVertical: spacing.xs,
     gap: spacing.xs,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 1,
   },
   modeLabel: {
     ...typography.caption,

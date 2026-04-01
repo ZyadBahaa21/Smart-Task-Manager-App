@@ -83,7 +83,7 @@ export const TaskEditorModal = memo(
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={[styles.overlay, { backgroundColor: colors.overlay }]}>
-          <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}> 
+          <View style={[styles.card, { backgroundColor: colors.cardElevated, borderColor: colors.border, shadowColor: colors.shadow }]}> 
             <Text style={[styles.title, { color: colors.text }]}>
               {task ? 'Edit Task' : 'Add Task'}
             </Text>
@@ -132,8 +132,8 @@ export const TaskEditorModal = memo(
                     style={({ pressed }) => [
                       styles.priorityButton,
                       {
-                        backgroundColor: isActive ? colors.primary : colors.background,
-                        borderColor: colors.border,
+                          backgroundColor: isActive ? colors.primary : colors.card,
+                          borderColor: isActive ? colors.primary : colors.border,
                         opacity: pressed ? 0.84 : 1,
                       },
                     ]}>
@@ -152,7 +152,11 @@ export const TaskEditorModal = memo(
             <View style={styles.footer}>
               <Pressable
                 onPress={onClose}
-                style={({ pressed }) => [styles.footerButton, pressed && styles.pressedButton]}>
+                style={({ pressed }) => [
+                  styles.footerButton,
+                  { backgroundColor: colors.card },
+                  pressed && styles.pressedButton,
+                ]}>
                 <Text style={[styles.footerButtonText, { color: colors.secondaryText }]}>Cancel</Text>
               </Pressable>
               <Pressable
@@ -192,6 +196,10 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     padding: spacing.xl,
     gap: spacing.md,
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.2,
+    shadowRadius: 22,
+    elevation: 8,
   },
   title: {
     ...typography.title,
@@ -207,10 +215,7 @@ const styles = StyleSheet.create({
     minHeight: 100,
   },
   dueDateInput: {
-    borderWidth: 1,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
+    letterSpacing: 0.4,
   },
   priorityRow: {
     flexDirection: 'row',

@@ -33,7 +33,7 @@ export const TaskItem = memo(
         style={[
           styles.container,
           {
-            backgroundColor: colors.card,
+            backgroundColor: colors.cardElevated,
             borderColor: colors.border,
             shadowColor: colors.shadow,
           },
@@ -86,7 +86,7 @@ export const TaskItem = memo(
               Due: {dueData.label}
             </Text>
             {dueData.isOverdue ? (
-              <View style={[styles.overdueBadge, { backgroundColor: colors.primaryMuted }]}> 
+              <View style={[styles.overdueBadge, styles.dangerTint]}> 
                 <Text style={[styles.overdueText, { color: colors.danger }]}>Overdue</Text>
               </View>
             ) : null}
@@ -109,7 +109,7 @@ export const TaskItem = memo(
               onPress={() => onDeleteTask(task.id)}
               style={({ pressed }) => [
                 styles.actionButton,
-                { backgroundColor: colors.primaryMuted },
+                styles.dangerTint,
                 pressed && styles.pressedAction,
               ]}>
               <Text style={[styles.actionText, { color: colors.danger }]}>Delete</Text>
@@ -127,10 +127,10 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     padding: spacing.lg,
     gap: spacing.sm,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 14,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 3,
   },
   statusRow: {
     flexDirection: 'row',
@@ -175,6 +175,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
   },
+  dangerTint: {
+    backgroundColor: 'rgba(220, 38, 38, 0.12)',
+  },
   overdueText: {
     ...typography.caption,
     fontWeight: '700',
@@ -184,9 +187,9 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   actionButton: {
-    paddingHorizontal: spacing.sm,
+    paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
-    borderRadius: radius.sm,
+    borderRadius: radius.pill,
   },
   actionText: {
     ...typography.label,
