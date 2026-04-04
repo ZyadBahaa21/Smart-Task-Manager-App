@@ -19,10 +19,10 @@ export const FilterTabs = memo(
     const colors = getTheme(isDarkMode);
 
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: colors.cardElevated, borderColor: colors.border }]}> 
         {filters.map(filter => {
           const isActive = activeFilter === filter;
-          const textColorStyle = { color: isActive ? '#ffffff' : colors.text };
+          const textColorStyle = { color: isActive ? '#ffffff' : colors.secondaryText };
 
           return (
             <Pressable
@@ -31,8 +31,8 @@ export const FilterTabs = memo(
               style={({ pressed }) => [
                 styles.tab,
                 {
-                  backgroundColor: isActive ? colors.primary : colors.card,
-                  borderColor: colors.border,
+                  backgroundColor: isActive ? colors.primary : 'transparent',
+                  borderColor: isActive ? colors.primary : 'transparent',
                   opacity: pressed ? 0.84 : 1,
                 },
               ]}>
@@ -55,12 +55,17 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     gap: spacing.sm,
+    borderWidth: 1,
+    borderRadius: radius.pill,
+    padding: spacing.xs,
   },
   tab: {
     borderWidth: 1,
     borderRadius: radius.pill,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
+    flex: 1,
+    alignItems: 'center',
   },
   tabText: {
     ...typography.label,

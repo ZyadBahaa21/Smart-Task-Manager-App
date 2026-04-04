@@ -1,5 +1,6 @@
 import { memo, useEffect, useMemo, useState } from 'react';
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -31,7 +32,9 @@ export const TaskEditorModal = memo(
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
+    const [dueDate, setDueDate] = useState('');
     const [priority, setPriority] = useState<TaskPriority>('medium');
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
       if (!visible) {
@@ -41,13 +44,15 @@ export const TaskEditorModal = memo(
       if (task) {
         setTitle(task.title);
         setDescription(task.description);
+        setDueDate(task.dueDate ?? '');
         setPriority(task.priority);
       } else {
         setTitle('');
         setDescription('');
+        setDueDate('');
         setPriority('medium');
       }
-    }, [task, visible]);
+    }, [visible]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const canSave = useMemo(() => title.trim().length > 0, [title]);
 
@@ -56,15 +61,21 @@ export const TaskEditorModal = memo(
         return;
       }
 
-      onSave(
-        {
-          title,
-          description,
-          priority,
-        },
-        task?.id,
-      );
-      onClose();
+      setIsSaving(true);
+
+      setTimeout(() => {
+        onSave(
+          {
+            title,
+            description,
+            priority,
+            dueDate,
+          },
+          task?.id,
+        );
+        setIsSaving(false);
+        onClose();
+      }, 350);
     };
 
     return (
@@ -72,7 +83,7 @@ export const TaskEditorModal = memo(
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={[styles.overlay, { backgroundColor: colors.overlay }]}>
-          <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}> 
+          <View style={[styles.card, { backgroundColor: colors.cardElevated, borderColor: colors.border, shadowColor: colors.shadow }]}> 
             <Text style={[styles.title, { color: colors.text }]}>
               {task ? 'Edit Task' : 'Add Task'}
             </Text>
@@ -101,6 +112,14 @@ export const TaskEditorModal = memo(
               maxLength={240}
             />
 
+            <TextInput
+              value={dueDate}
+              onChangeText={setDueDate}
+              placeholder="Due date (YYYY-MM-DD)"
+              placeholderTextColor={colors.placeholder}
+              style={[styles.input, styles.dueDateInput, { color: colors.text, borderColor: colors.border }]}
+            />
+
             <View style={styles.priorityRow}>
               {priorities.map(item => {
                 const isActive = priority === item;
@@ -113,8 +132,8 @@ export const TaskEditorModal = memo(
                     style={({ pressed }) => [
                       styles.priorityButton,
                       {
-                        backgroundColor: isActive ? colors.primary : colors.background,
-                        borderColor: colors.border,
+                          backgroundColor: isActive ? colors.primary : colors.card,
+                          borderColor: isActive ? colors.primary : colors.border,
                         opacity: pressed ? 0.84 : 1,
                       },
                     ]}>
@@ -133,12 +152,16 @@ export const TaskEditorModal = memo(
             <View style={styles.footer}>
               <Pressable
                 onPress={onClose}
-                style={({ pressed }) => [styles.footerButton, pressed && styles.pressedButton]}>
+                style={({ pressed }) => [
+                  styles.footerButton,
+                  { backgroundColor: colors.card },
+                  pressed && styles.pressedButton,
+                ]}>
                 <Text style={[styles.footerButtonText, { color: colors.secondaryText }]}>Cancel</Text>
               </Pressable>
               <Pressable
                 onPress={onConfirm}
-                disabled={!canSave}
+                disabled={!canSave || isSaving}
                 style={({ pressed }) => [
                   styles.footerButton,
                   styles.primaryButton,
@@ -147,7 +170,12 @@ export const TaskEditorModal = memo(
                     opacity: pressed ? 0.82 : 1,
                   },
                 ]}>
-                <Text style={[styles.footerButtonText, styles.primaryButtonText]}>Save</Text>
+                <View style={styles.saveButtonContent}>
+                  {isSaving ? <ActivityIndicator size="small" color="#ffffff" /> : null}
+                  <Text style={[styles.footerButtonText, styles.primaryButtonText]}>
+                    {isSaving ? 'Saving...' : 'Save'}
+                  </Text>
+                </View>
               </Pressable>
             </View>
           </View>
@@ -168,6 +196,10 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     padding: spacing.xl,
     gap: spacing.md,
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.2,
+    shadowRadius: 22,
+    elevation: 8,
   },
   title: {
     ...typography.title,
@@ -181,6 +213,9 @@ const styles = StyleSheet.create({
   },
   multilineInput: {
     minHeight: 100,
+  },
+  dueDateInput: {
+    letterSpacing: 0.4,
   },
   priorityRow: {
     flexDirection: 'row',
@@ -219,5 +254,10 @@ const styles = StyleSheet.create({
   },
   pressedButton: {
     opacity: 0.72,
+  },
+  saveButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
   },
 });

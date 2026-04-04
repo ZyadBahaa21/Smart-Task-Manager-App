@@ -16,7 +16,15 @@ export const TaskSearchBar = memo(
     const colors = getTheme(isDarkMode);
 
     return (
-      <View style={[styles.container, { backgroundColor: colors.card, borderColor: colors.border }]}> 
+      <View
+        style={[
+          styles.container,
+          {
+            backgroundColor: colors.cardElevated,
+            borderColor: colors.border,
+            shadowColor: colors.shadow,
+          },
+        ]}>
         <TextInput
           value={value}
           onChangeText={onChangeText}
@@ -37,6 +45,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: radius.md,
     paddingHorizontal: spacing.md,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 1,
   },
   input: {
     ...typography.body,

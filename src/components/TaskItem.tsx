@@ -7,6 +7,7 @@ import { radius, spacing } from '../theme/spacing';
 import { typography } from '../theme/typography';
 import { Task } from '../types/task';
 import { PriorityBadge } from './PriorityBadge';
+import { useDueDateStatus } from '../hooks/useDueDateStatus';
 
 interface TaskItemProps {
   task: Task;
@@ -19,6 +20,7 @@ interface TaskItemProps {
 export const TaskItem = memo(
   ({ task, isDarkMode, onToggleComplete, onEditTask, onDeleteTask }: TaskItemProps) => {
     const colors = getTheme(isDarkMode);
+    const dueData = useDueDateStatus({ dueDate: task.dueDate, completed: task.completed });
     const checkboxFillStyle = {
       backgroundColor: task.completed ? colors.success : 'transparent',
     };
@@ -31,7 +33,7 @@ export const TaskItem = memo(
         style={[
           styles.container,
           {
-            backgroundColor: colors.card,
+            backgroundColor: colors.cardElevated,
             borderColor: colors.border,
             shadowColor: colors.shadow,
           },
@@ -74,6 +76,23 @@ export const TaskItem = memo(
           </Text>
         ) : null}
 
+        {dueData.hasDueDate ? (
+          <View style={styles.dueRow}>
+            <Text
+              style={[
+                styles.dueText,
+                { color: dueData.isOverdue ? colors.danger : colors.secondaryText },
+              ]}>
+              Due: {dueData.label}
+            </Text>
+            {dueData.isOverdue ? (
+              <View style={[styles.overdueBadge, styles.dangerTint]}> 
+                <Text style={[styles.overdueText, { color: colors.danger }]}>Overdue</Text>
+              </View>
+            ) : null}
+          </View>
+        ) : null}
+
         <View style={styles.footerRow}>
           <PriorityBadge priority={task.priority} isDarkMode={isDarkMode} />
           <View style={styles.actionRow}>
@@ -90,7 +109,7 @@ export const TaskItem = memo(
               onPress={() => onDeleteTask(task.id)}
               style={({ pressed }) => [
                 styles.actionButton,
-                { backgroundColor: colors.primaryMuted },
+                styles.dangerTint,
                 pressed && styles.pressedAction,
               ]}>
               <Text style={[styles.actionText, { color: colors.danger }]}>Delete</Text>
@@ -108,10 +127,10 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     padding: spacing.lg,
     gap: spacing.sm,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 14,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 3,
   },
   statusRow: {
     flexDirection: 'row',
@@ -142,14 +161,35 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  dueRow: {
+    marginTop: spacing.xs,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  dueText: {
+    ...typography.caption,
+  },
+  overdueBadge: {
+    borderRadius: radius.pill,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+  },
+  dangerTint: {
+    backgroundColor: 'rgba(220, 38, 38, 0.12)',
+  },
+  overdueText: {
+    ...typography.caption,
+    fontWeight: '700',
+  },
   actionRow: {
     flexDirection: 'row',
     gap: spacing.sm,
   },
   actionButton: {
-    paddingHorizontal: spacing.sm,
+    paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
-    borderRadius: radius.sm,
+    borderRadius: radius.pill,
   },
   actionText: {
     ...typography.label,

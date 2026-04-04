@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useMemo, useState } from 'react';
-import { FlatList, ListRenderItem, StyleSheet, View } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '../components/EmptyState';
@@ -12,6 +12,7 @@ import { TaskEditorModal } from '../components/TaskEditorModal';
 import { TaskItem } from '../components/TaskItem';
 import { TaskSearchBar } from '../components/TaskSearchBar';
 import { useFilteredTasks } from '../hooks/useFilteredTasks';
+import { useTaskSummary } from '../hooks/useTaskSummary';
 import { getTheme } from '../theme/palette';
 import { spacing } from '../theme/spacing';
 import { RootStackParamList } from '../types/navigation';
@@ -75,25 +76,7 @@ export const TaskListScreen = (_props: Props) => {
     [deleteTask],
   );
 
-  const keyExtractor = useCallback((item: Task) => item.id, []);
-
-  const renderItem = useCallback<ListRenderItem<Task>>(
-    ({ item }) => (
-      <TaskItem
-        task={item}
-        isDarkMode={isDarkMode}
-        onToggleComplete={toggleTaskStatus}
-        onEditTask={openEditModal}
-        onDeleteTask={handleDeleteTask}
-      />
-    ),
-    [handleDeleteTask, isDarkMode, openEditModal, toggleTaskStatus],
-  );
-
-  const taskSummary = useMemo(() => {
-    const completedCount = tasks.filter(task => task.completed).length;
-    return `${completedCount}/${tasks.length} completed`;
-  }, [tasks]);
+  const taskSummaryData = useTaskSummary({ tasks });
 
   const emptyStateContent = useMemo(() => {
     if (tasks.length === 0) {
@@ -129,7 +112,7 @@ export const TaskListScreen = (_props: Props) => {
         <View style={styles.header}>
           <ScreenHeader
             title="Your Tasks"
-            subtitle={taskSummary}
+            subtitle={taskSummaryData.summaryText}
             isDarkMode={isDarkMode}
             onToggleDarkMode={toggleDarkMode}
           />
@@ -143,18 +126,21 @@ export const TaskListScreen = (_props: Props) => {
         ) : (
           <FlatList
             data={visibleTasks}
-            keyExtractor={keyExtractor}
+            keyExtractor={item => item.id}
             contentContainerStyle={[
               styles.listContent,
               visibleTasks.length === 0 && styles.emptyListContent,
             ]}
             showsVerticalScrollIndicator={false}
-            renderItem={renderItem}
-            initialNumToRender={8}
-            maxToRenderPerBatch={8}
-            windowSize={7}
-            updateCellsBatchingPeriod={45}
-            removeClippedSubviews
+            renderItem={({ item }) => (
+              <TaskItem
+                task={item}
+                isDarkMode={isDarkMode}
+                onToggleComplete={toggleTaskStatus}
+                onEditTask={openEditModal}
+                onDeleteTask={handleDeleteTask}
+              />
+            )}
             ListEmptyComponent={
               <EmptyState
                 isDarkMode={isDarkMode}
@@ -186,7 +172,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
+    paddingTop: spacing.lg,
     gap: spacing.md,
   },
   header: {

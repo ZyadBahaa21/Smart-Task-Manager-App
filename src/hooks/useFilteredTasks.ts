@@ -41,6 +41,15 @@ export const useFilteredTasks = ({
           return Number(a.completed) - Number(b.completed);
         }
 
+        if (a.dueDate || b.dueDate) {
+          const aDate = a.dueDate ? new Date(a.dueDate).getTime() : Number.POSITIVE_INFINITY;
+          const bDate = b.dueDate ? new Date(b.dueDate).getTime() : Number.POSITIVE_INFINITY;
+
+          if (aDate !== bDate) {
+            return aDate - bDate;
+          }
+        }
+
         const prioritySort = compareByPriority(a.priority, b.priority);
         if (prioritySort !== 0) {
           return prioritySort;
